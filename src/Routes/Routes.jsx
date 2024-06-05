@@ -23,7 +23,7 @@ export const router = createBrowserRouter([
         element: <LabDetails />,
       },
       {
-        path: "/updatelab",
+        path: "/updatelab/:labId",
         element: <UpdateLab />,
       },
     ],

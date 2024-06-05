@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getLabCollection } from "../services/labServices";
+import ReactHtmlParser, { processNodes, convertNodeToElement, htmlparser2 } from 'react-html-parser';
+import parse from 'html-react-parser';
 
 const LabDetails = () => {
   const { labId } = useParams();
@@ -50,16 +52,16 @@ const LabDetails = () => {
           </div>
           <div className="my-5">
             <h3 className="text-2xl font-semibold mb-2">Lab Description</h3>
-            <p className="text-justify">
-              {lab.desc}
+            <p className="text-justify px-10">
+              {parse(lab.desc)}
             </p>
           </div>
           <div className="my-5">
             <h3 className="text-2xl font-semibold mb-2">
               Lab Objective and Tech Stack
             </h3>
-            <p className="text-justify">
-              {lab.objective}
+            <p className="text-justify px-10">
+              {parse(lab.objective)}
             </p>
           </div>
           {steps.map((step, index) => (
@@ -98,7 +100,7 @@ const LabDetails = () => {
             </div>
           ))}
           <div>
-            <Link to={"/updatelab"}>
+            <Link to={"/updatelab/"+labId}>
               <button className="p-3 rounded-md border border-base-300">
                 Update Lab
               </button>

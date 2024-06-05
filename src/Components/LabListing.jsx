@@ -9,7 +9,8 @@ const LabListing = () => {
     const fetchLabs = async () => {
       try {
         const response = await getLabCollections();
-        setLabs(response.data);
+        const sortedLabs = response.data.sort((a, b) => a.id - b.id);
+        setLabs(sortedLabs);
       } catch (error) {
         console.error("Error fetching lab collections:", error);
       }
@@ -84,7 +85,7 @@ const LabListing = () => {
                         Details
                       </button>
                     </Link>
-                    <Link to={"/updatelab"}>
+                    <Link to={"/updatelab/"+ld.id}>
                       <button className="w-24 py-1 rounded-md border border-base-300">
                         Update Lab
                       </button>
