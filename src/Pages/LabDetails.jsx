@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const LabDetails = () => {
     // Mock data to simulate backend data
@@ -58,7 +59,7 @@ const LabDetails = () => {
                 </div>
             ))}
             <div>
-                <button className="p-3 rounded-md border border-base-300">Update Lab</button>
+                <Link to={'/updatelab'}><button className="p-3 rounded-md border border-base-300">Update Lab</button></Link>
             </div>
         </div>
     );
