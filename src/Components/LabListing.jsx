@@ -45,7 +45,7 @@ const LabListing = () => {
                             <td className="w-full">This is a very long lab title</td>
                             <td className="flex gap-4">
                                 <Link to={'/labdetails'}><button className="w-24 py-1 rounded-md border border-base-300">Details</button></Link>
-                                <button className="w-24 py-1 rounded-md border border-base-300">Update Lab</button>
+                                <Link to={'/updatelab'}><button className="w-24 py-1 rounded-md border border-base-300">Update Lab</button></Link>
                                 <button className="w-24 py-1 rounded-md border border-base-300">Publish</button>
                                 <button className="w-24 py-1 rounded-md border border-base-300">Delete</button>
                             </td>

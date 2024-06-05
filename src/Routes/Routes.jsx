@@ -3,6 +3,7 @@ import Main from "../Layout/Main";
 import Home from "../Pages/Home";
 import CreateNewLab from "../Pages/CreateNewLab";
 import LabDetails from "../Pages/LabDetails";
+import UpdateLab from "../Pages/UpdateLab";
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ export const router = createBrowserRouter([
       {
         path: "/labdetails",
         element: <LabDetails />,
+      },
+      {
+        path: "/updatelab",
+        element: <UpdateLab />,
       },
     ],
   },
