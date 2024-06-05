@@ -66,9 +66,9 @@ const LabListing = () => {
           {/* head */}
           <thead>
             <tr>
-              <th>Sl No.</th>
-              <th>Lab Title</th>
-              <th>Action</th>
+              <th className="text-center">Sl No.</th>
+              <th className="text-center">Lab Title</th>
+              <th className="text-center">Action</th>
             </tr>
           </thead>
           <tbody>
