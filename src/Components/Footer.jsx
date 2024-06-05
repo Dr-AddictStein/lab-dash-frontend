@@ -1,8 +1,8 @@
 
 const Footer = () => {
     return (
-        <div>
-            footer
+        <div className="h-[10vh]">
+            {/* footer */}
         </div>
     );
 };

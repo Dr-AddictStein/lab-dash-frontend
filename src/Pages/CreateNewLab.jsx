@@ -28,40 +28,40 @@ const CreateNewLab = () => {
             <form action="">
                 <div id="first-page">
                     <div className="my-3">
-                        <label htmlFor="">Lab Title</label>
-                        <input type="text" name="labTitle" className="w-full border border-base-300 rounded-md p-2" placeholder="Enter Lab Title" />
+                        <label htmlFor="" className='mb-3'>Lab Title</label>
+                        <input type="text" name="labTitle" className="w-full border border-base-300 rounded-md p-2 mt-3" placeholder="Enter Lab Title" />
                     </div>
                     <div className="my-3">
-                        <label htmlFor="">Lab Description</label>
-                        <JoditEditor name='labDesc' ref={editor1} required />
+                        <label htmlFor="" className='mb-3'>Lab Description</label>
+                        <JoditEditor name='labDesc' ref={editor1} required  className='mt-3'/>
                     </div>
                     <div className="my-3">
-                        <label htmlFor="">Lab Objective and Tech Stack</label>
-                        <JoditEditor name='labObj' ref={editor2} required />
+                        <label htmlFor="" className='mb-3'>Lab Objective and Tech Stack</label>
+                        <JoditEditor name='labObj' ref={editor2} required className='mt-3'/>
                     </div>
                     <div className="flex gap-3">
                         <div>
-                            <label htmlFor="">Lab Resource Code</label>
-                            <input type="file" name="labCode" className="file-input file-input-bordered w-full" />
+                            <label htmlFor="" className='mb-3'>Lab Resource Code</label>
+                            <input type="file" name="labCode" className="file-input file-input-bordered w-full mt-3" />
                         </div>
                         <div>
-                            <label htmlFor="">Lab Thumbnail</label>
-                            <input type="file" name="labThumb" className="file-input file-input-bordered w-full" />
+                            <label htmlFor="" className='mb-3'>Lab Thumbnail</label>
+                            <input type="file" name="labThumb" className="file-input file-input-bordered w-full mt-3" />
                         </div>
                         <div className="flex gap-3 my-6">
-                            <select name="cloudProvider" className="select select-bordered w-full">
+                            <select name="cloudProvider" className="select select-bordered w-full mt-3">
                                 <option disabled selected>Select Cloud Provider</option>
                                 <option>Normal Apple</option>
                                 <option>Normal Orange</option>
                                 <option>Normal Tomato</option>
                             </select>
-                            <select name="labType" className="select select-bordered w-full">
+                            <select name="labType" className="select select-bordered w-full mt-3">
                                 <option disabled selected>Lab Type</option>
                                 <option>Normal Apple</option>
                                 <option>Normal Orange</option>
                                 <option>Normal Tomato</option>
                             </select>
-                            <select name='difficulty' className="select select-bordered w-full">
+                            <select name='difficulty' className="select select-bordered w-full mt-3">
                                 <option disabled selected>Difficulty Level</option>
                                 <option>Normal Apple</option>
                                 <option>Normal Orange</option>

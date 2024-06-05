@@ -1,8 +1,8 @@
 
 const Navbar = () => {
     return (
-        <div>
-            navbar
+        <div className="h-[5vh]">
+            {/* navbar */}
         </div>
     );
 };
