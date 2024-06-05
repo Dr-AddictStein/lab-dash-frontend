@@ -25,7 +25,7 @@ const LabListing = () => {
                     </select>
                 </div>
                 <div>
-                    <Link to={'/createnewlab'}><button className="py-2 px-3 rounded-md border border-black">Create new lab</button></Link>
+                    <Link to={'/createnewlab'}><button className="py-2 px-3 rounded-md border border-base-300">Create new lab</button></Link>
                 </div>
             </div>
             <div className="overflow-x-auto mt-10">
@@ -44,10 +44,10 @@ const LabListing = () => {
                             <td className="w-[5%]">1</td>
                             <td className="w-full">This is a very long lab title</td>
                             <td className="flex gap-4">
-                                <button className="w-24 py-1 rounded-md border border-black">Edit Metadata</button>
-                                <button className="w-24 py-1 rounded-md border border-black">Edt Steps</button>
-                                <button className="w-24 py-1 rounded-md border border-black">Publish</button>
-                                <button className="w-24 py-1 rounded-md border border-black">Delete</button>
+                                <Link to={'/labdetails'}><button className="w-24 py-1 rounded-md border border-base-300">Details</button></Link>
+                                <button className="w-24 py-1 rounded-md border border-base-300">Update Lab</button>
+                                <button className="w-24 py-1 rounded-md border border-base-300">Publish</button>
+                                <button className="w-24 py-1 rounded-md border border-base-300">Delete</button>
                             </td>
                         </tr>
                         {/* row 2 */}
@@ -55,10 +55,10 @@ const LabListing = () => {
                             <td className="w-[5%]">2</td>
                             <td>This is a very long lab title</td>
                             <td className="flex gap-4">
-                                <button className="w-24 py-1 rounded-md border border-black">Edit Metadata</button>
-                                <button className="w-24 py-1 rounded-md border border-black">Edt Steps</button>
-                                <button className="w-24 py-1 rounded-md border border-black">Publish</button>
-                                <button className="w-24 py-1 rounded-md border border-black">Delete</button>
+                                <Link to={'/labdetails'}><button className="w-24 py-1 rounded-md border border-base-300">Details</button></Link>
+                                <button className="w-24 py-1 rounded-md border border-base-300">Update Lab</button>
+                                <button className="w-24 py-1 rounded-md border border-base-300">Publish</button>
+                                <button className="w-24 py-1 rounded-md border border-base-300">Delete</button>
                             </td>
                         </tr>
                         {/* row 3 */}
@@ -66,10 +66,10 @@ const LabListing = () => {
                             <td className="w-[5%]">3</td>
                             <td>This is a very long lab title</td>
                             <td className="flex gap-4">
-                                <button className="w-24 py-1 rounded-md border border-black">Edit Metadata</button>
-                                <button className="w-24 py-1 rounded-md border border-black">Edt Steps</button>
-                                <button className="w-24 py-1 rounded-md border border-black">Publish</button>
-                                <button className="w-24 py-1 rounded-md border border-black">Delete</button>
+                                <Link to={'/labdetails'}><button className="w-24 py-1 rounded-md border border-base-300">Details</button></Link>
+                                <button className="w-24 py-1 rounded-md border border-base-300">Update Lab</button>
+                                <button className="w-24 py-1 rounded-md border border-base-300">Publish</button>
+                                <button className="w-24 py-1 rounded-md border border-base-300">Delete</button>
                             </td>
                         </tr>
                     </tbody>
