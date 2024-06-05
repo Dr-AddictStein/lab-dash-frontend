@@ -19,7 +19,7 @@ export const router = createBrowserRouter([
         element: <CreateNewLab />,
       },
       {
-        path: "/labdetails",
+        path: "/labdetails/:labId",
         element: <LabDetails />,
       },
       {

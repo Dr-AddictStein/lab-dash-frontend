@@ -79,7 +79,7 @@ const LabListing = () => {
                   <td className="w-[5%]">{index+1}</td>
                   <td className="w-full">{ld.title}</td>
                   <td className="flex gap-4">
-                    <Link to={"/labdetails"}>
+                    <Link to={"/labdetails/"+ld.id}>
                       <button className="w-24 py-1 rounded-md border border-base-300">
                         Details
                       </button>
