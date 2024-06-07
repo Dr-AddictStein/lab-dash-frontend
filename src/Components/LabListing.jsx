@@ -1,27 +1,66 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getLabCollection, getLabCollections } from "../services/labServices";
+import { deleteLabCollection, getLabCollection, getLabCollections, updateLabCollection } from "../services/labServices";
 
 const LabListing = () => {
   const [labs, setLabs] = useState([]);
 
+  const fetchLabs = async () => {
+    try {
+      const response = await getLabCollections();
+      const sortedLabs = response.data.sort((a, b) => a.id - b.id);
+      setLabs(sortedLabs);
+    } catch (error) {
+      console.error("Error fetching lab collections:", error);
+    }
+  };
   useEffect(() => {
-    const fetchLabs = async () => {
-      try {
-        const response = await getLabCollections();
-        const sortedLabs = response.data.sort((a, b) => a.id - b.id);
-        setLabs(sortedLabs);
-      } catch (error) {
-        console.error("Error fetching lab collections:", error);
-      }
-    };
 
     fetchLabs();
   }, []);
 
-  useEffect(()=>{
-    console.log("SSS",labs[0]);
-  },[labs])
+
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    const lab = labs.filter((l)=>{
+      return (l.id===e.target.value);
+    })[0]
+    const labData = {
+      ...lab,
+      isPublished: true,
+      isDeleted: true,
+    };
+    try {
+      console.log("SAAAA",labData);
+      await updateLabCollection(e.target.value, labData);
+      fetchLabs();
+    } catch (error) {
+      console.error("Error updating lab:", error);
+    }
+  }
+
+  const handleUnpublish = async (e, index) => {
+    e.preventDefault();
+    const lab = labs.filter((l)=>{
+      return (l.id===e.target.value);
+    })[0]
+    const labData = {
+      ...lab,
+      isPublished: false,
+      isDeleted: false,
+    };
+    try {
+      console.log("SAAAA",labData);
+      await updateLabCollection(e.target.value, labData);
+      fetchLabs();
+    } catch (error) {
+      console.error("Error updating lab:", error);
+    }
+  };
+
+  useEffect(() => {
+    console.log("SSS", labs[0]);
+  }, [labs])
 
 
 
@@ -67,36 +106,40 @@ const LabListing = () => {
           {/* head */}
           <thead>
             <tr>
-              <th className="text-center">Sl No.</th>
-              <th className="text-center">Lab Title</th>
+              <th className="text-center">Lab ID</th>
               <th className="text-center">Action</th>
             </tr>
           </thead>
           <tbody>
             {/* row 1 */}
-            {labs.map((ld,index) => {
+            {labs.map((ld, index) => {
               return (
                 <tr key={ld.id}>
-                  <td className="w-[5%]">{index+1}</td>
-                  <td className="w-full">{ld.title}</td>
-                  <td className="flex gap-4">
-                    <Link to={"/labdetails/"+ld.id}>
-                      <button className="w-24 py-1 rounded-md border border-base-300">
-                        Details
-                      </button>
-                    </Link>
-                    <Link to={"/updatelab/"+ld.id}>
-                      <button className="w-24 py-1 rounded-md border border-base-300">
-                        Update Lab
-                      </button>
-                    </Link>
-                    <button className="w-24 py-1 rounded-md border border-base-300">
-                      Publish
-                    </button>
-                    <button className="w-24 py-1 rounded-md border border-base-300">
-                      Delete
-                    </button>
-                  </td>
+                  {
+                    (ld.isPublished && !ld.isDeleted) &&
+                    <>
+                      <td className="w-[5%] text-center">{ld.id}</td>
+                      <td className="w-full text-center">{ld.title}</td>
+                      <td className="flex gap-4">
+                        <Link to={"/labdetails/" + ld.id}>
+                          <button className="w-24 py-1 rounded-md border border-base-300">
+                            Details
+                          </button>
+                        </Link>
+                        <Link to={"/updatelab/" + ld.id}>
+                          <button className="w-24 py-1 rounded-md border border-base-300">
+                            Update Lab
+                          </button>
+                        </Link>
+                        <button className="w-24 py-1 rounded-md border border-base-300" value={ld.id} onClick={handleUnpublish}>
+                          Un-Publish
+                        </button>
+                        <button name="deleteLab" value={ld.id} className="w-24 py-1 rounded-md border border-base-300" onClick={handleDelete}>
+                          Delete
+                        </button>
+                      </td>
+                    </>
+                  }
                 </tr>
               );
             })}
