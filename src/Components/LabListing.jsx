@@ -27,7 +27,6 @@ const LabListing = () => {
     })[0]
     const labData = {
       ...lab,
-      isPublished: true,
       isDeleted: true,
     };
     try {
@@ -47,7 +46,6 @@ const LabListing = () => {
     const labData = {
       ...lab,
       isPublished: false,
-      isDeleted: false,
     };
     try {
       console.log("SAAAA",labData);
