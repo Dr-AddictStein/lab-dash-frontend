@@ -22,15 +22,15 @@ const LabListing = () => {
 
   const handleDelete = async (e) => {
     e.preventDefault();
-    const lab = labs.filter((l)=>{
-      return (l.id===e.target.value);
+    const lab = labs.filter((l) => {
+      return (l.id === e.target.value);
     })[0]
     const labData = {
       ...lab,
       isDeleted: true,
     };
     try {
-      console.log("SAAAA",labData);
+      console.log("SAAAA", labData);
       await updateLabCollection(e.target.value, labData);
       fetchLabs();
     } catch (error) {
@@ -40,15 +40,15 @@ const LabListing = () => {
 
   const handleUnpublish = async (e, index) => {
     e.preventDefault();
-    const lab = labs.filter((l)=>{
-      return (l.id===e.target.value);
+    const lab = labs.filter((l) => {
+      return (l.id === e.target.value);
     })[0]
     const labData = {
       ...lab,
       isPublished: false,
     };
     try {
-      console.log("SAAAA",labData);
+      console.log("SAAAA", labData);
       await updateLabCollection(e.target.value, labData);
       fetchLabs();
     } catch (error) {
@@ -70,25 +70,25 @@ const LabListing = () => {
             <option disabled selected>
               Cloud Provider
             </option>
-            <option>Normal Apple</option>
-            <option>Normal Orange</option>
-            <option>Normal Tomato</option>
+            <option>Google Cloud</option>
+            <option>AWS</option>
+            <option>Snowflake</option>
+            <option>Azure Cloud</option>
           </select>
           <select className="select select-bordered w-full max-w-[200px]">
             <option disabled selected>
               Lab Type
             </option>
-            <option>Normal Apple</option>
-            <option>Normal Orange</option>
-            <option>Normal Tomato</option>
+            <option>Data Science/ML</option>
+            <option>Data Engineering/MLOps</option>
+            <option>AI/LLM</option>
           </select>
           <select className="select select-bordered w-full max-w-[200px]">
             <option disabled selected>
               Difficulty Level
             </option>
-            <option>Normal Apple</option>
-            <option>Normal Orange</option>
-            <option>Normal Tomato</option>
+            <option>Beginner</option>
+            <option>Intermediate/Advanced</option>
           </select>
         </div>
         <div>

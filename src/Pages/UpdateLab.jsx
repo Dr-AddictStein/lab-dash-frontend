@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import JoditEditor from "jodit-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getLabCollection, updateLabCollection } from "../services/labServices";
+import parse from 'html-react-parser';
 
 const UpdateLab = () => {
   const { labId } = useParams();
@@ -162,9 +163,10 @@ const UpdateLab = () => {
               onChange={handleChange}
             >
               <option disabled>Select Cloud Provider</option>
-              <option>AWS</option>
-              <option>Azure</option>
               <option>Google Cloud</option>
+              <option>AWS</option>
+              <option>Snowflake</option>
+              <option>Azure Cloud</option>
             </select>
           </div>
           <div className="flex flex-col w-full">
@@ -176,8 +178,9 @@ const UpdateLab = () => {
               onChange={handleChange}
             >
               <option disabled>Lab Type</option>
-              <option>Tutorial</option>
-              <option>Project</option>
+              <option>Data Science/ML</option>
+              <option>Data Engineering/MLOps</option>
+              <option>AI/LLM</option>
             </select>
           </div>
           <div className="flex flex-col w-full">
@@ -189,9 +192,8 @@ const UpdateLab = () => {
               onChange={handleChange}
             >
               <option disabled>Difficulty Level</option>
-              <option>Easy</option>
-              <option>Medium</option>
-              <option>Hard</option>
+              <option>Beginner</option>
+              <option>Intermediate/Advanced</option>
             </select>
           </div>
         </div>

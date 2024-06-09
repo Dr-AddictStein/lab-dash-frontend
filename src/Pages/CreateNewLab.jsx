@@ -8,9 +8,9 @@ const CreateNewLab = () => {
     title: '',
     desc: '',
     objective: '',
-    cloudprovider: '',
-    type: '',
-    difficulty: '',
+    cloudprovider: 'Google Cloud',
+    type: 'Data Science/ML',
+    difficulty: 'Beginner',
     srccode: '',
     thumbnail: '',
     steps: [],
@@ -149,9 +149,10 @@ const CreateNewLab = () => {
               onChange={handleChange}
             >
               <option disabled>Select Cloud Provider</option>
-              <option>AWS</option>
-              <option>Azure</option>
               <option>Google Cloud</option>
+              <option>AWS</option>
+              <option>Snowflake</option>
+              <option>Azure Cloud</option>
             </select>
           </div>
           <div className="flex flex-col w-full">
@@ -163,8 +164,9 @@ const CreateNewLab = () => {
               onChange={handleChange}
             >
               <option disabled>Lab Type</option>
-              <option>Tutorial</option>
-              <option>Project</option>
+              <option>Data Science/ML</option>
+              <option>Data Engineering/MLOps</option>
+              <option>AI/LLM</option>
             </select>
           </div>
           <div className="flex flex-col w-full">
@@ -176,9 +178,8 @@ const CreateNewLab = () => {
               onChange={handleChange}
             >
               <option disabled>Difficulty Level</option>
-              <option>Easy</option>
-              <option>Medium</option>
-              <option>Hard</option>
+              <option>Beginner</option>
+              <option>Intermediate/Advanced</option>
             </select>
           </div>
         </div>

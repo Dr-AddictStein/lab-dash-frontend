@@ -92,7 +92,7 @@ const LabDetails = () => {
                   <div className="my-5">
                     <h3 className="text-xl font-semibold mb-2">Step Details</h3>
                     <p className="text-justify">
-                      {step.desc}
+                      {parse(step.desc)}
                     </p>
                   </div>
                 </div>
