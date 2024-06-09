@@ -1,54 +1,52 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { deleteLabCollection, getLabCollection, getLabCollections, updateLabCollection } from "../services/labServices";
+import { deleteLabCollection, getLabCollections, updateLabCollection } from "../services/labServices";
 
 const LabListing = () => {
   const [labs, setLabs] = useState([]);
+  const [filteredLabs, setFilteredLabs] = useState([]);
+  const [cloud, setCloud] = useState("");
+  const [type, setType] = useState("");
+  const [difficulty, setDifficulty] = useState("");
 
   const fetchLabs = async () => {
     try {
       const response = await getLabCollections();
       const sortedLabs = response.data.sort((a, b) => a.id - b.id);
       setLabs(sortedLabs);
+      setFilteredLabs(sortedLabs);
     } catch (error) {
       console.error("Error fetching lab collections:", error);
     }
   };
-  useEffect(() => {
 
+  useEffect(() => {
     fetchLabs();
   }, []);
 
-
   const handleDelete = async (e) => {
     e.preventDefault();
-    const lab = labs.filter((l) => {
-      return (l.id === e.target.value);
-    })[0]
+    const lab = labs.filter((l) => l.id === parseInt(e.target.value))[0];
     const labData = {
       ...lab,
       isDeleted: true,
     };
     try {
-      console.log("SAAAA", labData);
       await updateLabCollection(e.target.value, labData);
       fetchLabs();
     } catch (error) {
       console.error("Error updating lab:", error);
     }
-  }
+  };
 
-  const handleUnpublish = async (e, index) => {
+  const handleUnpublish = async (e) => {
     e.preventDefault();
-    const lab = labs.filter((l) => {
-      return (l.id === e.target.value);
-    })[0]
+    const lab = labs.filter((l) => l.id === parseInt(e.target.value))[0];
     const labData = {
       ...lab,
       isPublished: false,
     };
     try {
-      console.log("SAAAA", labData);
       await updateLabCollection(e.target.value, labData);
       fetchLabs();
     } catch (error) {
@@ -57,38 +55,57 @@ const LabListing = () => {
   };
 
   useEffect(() => {
-    console.log("SSS", labs[0]);
-  }, [labs])
+    filterLabs();
+  }, [cloud, type, difficulty, labs]);
 
+  const filterLabs = () => {
+    console.log("Filtering labs with", { cloud, type, difficulty });
 
+    const filtered = labs.filter((lab) => {
+      console.log("Lab properties", {
+        cloudprovider: lab.cloudprovider,
+        labType: lab.labType,
+        difficultyLevel: lab.difficultyLevel,
+        isPublished: lab.isPublished,
+        isDeleted: lab.isDeleted,
+      });
+
+      const matchesCloud = cloud ? lab.cloudprovider === cloud : true;
+      const matchesType = type ? lab.type === type : true;
+      const matchesDifficulty = difficulty ? lab.difficulty === difficulty : true;
+
+      return matchesCloud && matchesType && matchesDifficulty && lab.isPublished && !lab.isDeleted;
+    });
+
+    console.log("Filtered labs", filtered);
+    setFilteredLabs(filtered);
+  };
+
+  const handleCloudChange = (e) => setCloud(e.target.value);
+  const handleTypeChange = (e) => setType(e.target.value);
+  const handleDifficultyChange = (e) => setDifficulty(e.target.value);
 
   return (
     <div>
       <div className="flex justify-between">
         <div className="flex gap-3">
-          <select className="select select-bordered w-full max-w-[200px]">
-            <option disabled selected>
-              Cloud Provider
-            </option>
-            <option>Google Cloud</option>
-            <option>AWS</option>
-            <option>Snowflake</option>
-            <option>Azure Cloud</option>
+          <select className="select select-bordered w-full max-w-[200px]" onChange={handleCloudChange}>
+            <option value="">Cloud Provider</option>
+            <option value="Google Cloud">Google Cloud</option>
+            <option value="AWS">AWS</option>
+            <option value="Snowflake">Snowflake</option>
+            <option value="Azure Cloud">Azure Cloud</option>
           </select>
-          <select className="select select-bordered w-full max-w-[200px]">
-            <option disabled selected>
-              Lab Type
-            </option>
-            <option>Data Science/ML</option>
-            <option>Data Engineering/MLOps</option>
-            <option>AI/LLM</option>
+          <select className="select select-bordered w-full max-w-[200px]" onChange={handleTypeChange}>
+            <option value="">Lab Type</option>
+            <option value="Data Science/ML">Data Science/ML</option>
+            <option value="Data Engineering/MLOps">Data Engineering/MLOps</option>
+            <option value="AI/LLM">AI/LLM</option>
           </select>
-          <select className="select select-bordered w-full max-w-[200px]">
-            <option disabled selected>
-              Difficulty Level
-            </option>
-            <option>Beginner</option>
-            <option>Intermediate/Advanced</option>
+          <select className="select select-bordered w-full max-w-[200px]" onChange={handleDifficultyChange}>
+            <option value="">Difficulty Level</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate/Advanced">Intermediate/Advanced</option>
           </select>
         </div>
         <div>
@@ -109,39 +126,30 @@ const LabListing = () => {
             </tr>
           </thead>
           <tbody>
-            {/* row 1 */}
-            {labs.map((ld, index) => {
-              return (
-                <tr key={ld.id}>
-                  {
-                    (ld.isPublished && !ld.isDeleted) &&
-                    <>
-                      <td className="w-[5%] text-center">{ld.id}</td>
-                      <td className="w-full text-center">{ld.title}</td>
-                      <td className="flex gap-4">
-                        <Link to={"/labdetails/" + ld.id}>
-                          <button className="w-24 py-1 rounded-md border border-base-300">
-                            Details
-                          </button>
-                        </Link>
-                        <Link to={"/updatelab/" + ld.id}>
-                          <button className="w-24 py-1 rounded-md border border-base-300">
-                            Update Lab
-                          </button>
-                        </Link>
-                        <button className="w-24 py-1 rounded-md border border-base-300" value={ld.id} onClick={handleUnpublish}>
-                          Un-Publish
-                        </button>
-                        <button name="deleteLab" value={ld.id} className="w-24 py-1 rounded-md border border-base-300" onClick={handleDelete}>
-                          Delete
-                        </button>
-                      </td>
-                    </>
-                  }
-                </tr>
-              );
-            })}
-
+            {filteredLabs.map((ld) => (
+              <tr key={ld.id}>
+                <td className="w-[5%] text-center">{ld.id}</td>
+                <td className="w-full text-center">{ld.title}</td>
+                <td className="flex gap-4">
+                  <Link to={"/labdetails/" + ld.id}>
+                    <button className="w-24 py-1 rounded-md border border-base-300">
+                      Details
+                    </button>
+                  </Link>
+                  <Link to={"/updatelab/" + ld.id}>
+                    <button className="w-24 py-1 rounded-md border border-base-300">
+                      Update Lab
+                    </button>
+                  </Link>
+                  <button className="w-24 py-1 rounded-md border border-base-300" value={ld.id} onClick={handleUnpublish}>
+                    Un-Publish
+                  </button>
+                  <button name="deleteLab" value={ld.id} className="w-24 py-1 rounded-md border border-base-300" onClick={handleDelete}>
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
