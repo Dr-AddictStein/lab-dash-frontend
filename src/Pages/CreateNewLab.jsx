@@ -1,8 +1,7 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import JoditEditor from 'jodit-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { addLabCollection } from '../services/labServices';
-
 
 const CreateNewLab = () => {
   const [lab, setLab] = useState({
@@ -15,11 +14,12 @@ const CreateNewLab = () => {
     srccode: '',
     thumbnail: '',
     steps: [],
-    isPublished:true,
-    isDeleted:false
+    isPublished: true,
+    isDeleted: false
   });
   const editor1 = useRef(null);
   const editor2 = useRef(null);
+  const stepEditors = useRef([]);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -40,11 +40,19 @@ const CreateNewLab = () => {
     setLab((prevLab) => ({ ...prevLab, steps: updatedSteps }));
   };
 
+  const handleStepEditorChange = (index, value) => {
+    const updatedSteps = lab.steps.map((step, i) =>
+      i === index ? { ...step, desc: value } : step
+    );
+    setLab((prevLab) => ({ ...prevLab, steps: updatedSteps }));
+  };
+
   const addStep = () => {
     setLab((prevLab) => ({
       ...prevLab,
       steps: [...prevLab.steps, { name: '', desc: '', expanded: false }],
     }));
+    stepEditors.current.push(null);
   };
 
   const toggleStep = (index) => {
@@ -62,6 +70,10 @@ const CreateNewLab = () => {
       ...lab,
       desc: editor1.current.value,
       objective: editor2.current.value,
+      steps: lab.steps.map((step, index) => ({
+        ...step,
+        desc: stepEditors.current[index].value,
+      })),
     };
     try {
       await addLabCollection(labData);
@@ -186,9 +198,7 @@ const CreateNewLab = () => {
                 <p>Step {index + 1}</p>
               </div>
               <div
-                className={`collapse-content ${
-                  step.expanded ? 'block' : 'hidden'
-                }`}
+                className={`collapse-content ${step.expanded ? 'block' : 'hidden'}`}
               >
                 <div>
                   <div>
@@ -204,13 +214,15 @@ const CreateNewLab = () => {
                   </div>
                   <div className="my-3">
                     <label htmlFor="stepDesc">Step Description</label>
-                    <textarea
-                      name="desc"
-                      className="w-full border border-base-300 rounded-md h-[200px] p-2"
-                      placeholder="Enter Step Description"
+                    {/* <JoditEditor
+                      ref={(el) => (stepEditors.current[index] = el)}
                       value={step.desc}
-                      onChange={(e) => handleStepChange(index, e)}
-                    ></textarea>
+                      onBlur={(newContent) => handleStepEditorChange(index, newContent)}
+                    /> */}
+                    <JoditEditor
+                    ref={(el) => (stepEditors.current[index] = el)}
+                    value={step.desc} 
+                    onBlur={(newContent) => handleStepEditorChange(index, newContent)}/>
                   </div>
                 </div>
               </div>

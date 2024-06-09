@@ -46,10 +46,9 @@ const UpdateLab = () => {
     setLab((prevLab) => ({ ...prevLab, [name]: files[0] }));
   };
 
-  const handleStepChange = (index, e) => {
-    const { name, value } = e.target;
+  const handleStepChange = (index, value) => {
     const updatedSteps = lab.steps.map((step, i) =>
-      i === index ? { ...step, [name]: value } : step
+      i === index ? { ...step, desc: value } : step
     );
     setLab((prevLab) => ({ ...prevLab, steps: updatedSteps }));
   };
@@ -213,7 +212,7 @@ const UpdateLab = () => {
               </div>
               <div
                 className={`collapse-content ${
-                  step.expanded ? "block" : "hlabIdden"
+                  step.expanded ? "block" : "hidden"
                 }`}
               >
                 <div>
@@ -230,13 +229,12 @@ const UpdateLab = () => {
                   </div>
                   <div className="my-3">
                     <label htmlFor="stepDesc">Step Description</label>
-                    <textarea
-                      name="desc"
-                      className="w-full border border-base-300 rounded-md h-[200px] p-2"
-                      placeholder="Enter Step Description"
+                    <JoditEditor
                       value={step.desc}
-                      onChange={(e) => handleStepChange(index, e)}
-                    ></textarea>
+                      onBlur={(newContent) =>
+                        handleStepChange(index, newContent)
+                      }
+                    />
                   </div>
                 </div>
               </div>
