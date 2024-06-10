@@ -122,6 +122,7 @@ const LabListing = () => {
           <thead>
             <tr>
               <th className="text-center">Lab ID</th>
+              <th className="text-center">Lab Name</th>
               <th className="text-center">Action</th>
             </tr>
           </thead>

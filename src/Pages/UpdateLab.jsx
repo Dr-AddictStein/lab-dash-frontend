@@ -48,10 +48,14 @@ const UpdateLab = () => {
   };
 
   const handleStepChange = (index, value) => {
-    const updatedSteps = lab.steps.map((step, i) =>
-      i === index ? { ...step, desc: value } : step
-    );
-    setLab((prevLab) => ({ ...prevLab, steps: updatedSteps }));
+    if (typeof value.target.value === 'string') {
+      const updatedSteps = lab.steps.map((step, i) =>
+        i === index ? { ...step, name: value.target.value } : step
+      );
+      setLab((prevLab) => ({ ...prevLab, steps: updatedSteps }));
+    } else {
+      console.error("Unexpected value type in handleStepChange:", value);
+    }
   };
 
   const addStep = () => {
