@@ -60,7 +60,7 @@ const CreateNewLab = () => {
     formData.append('file', file);
     try {
       const response = await axios.post(`http://localhost:4000/api/file/image/${id}`, formData);
-      return response.data.url;
+      return response.data.data.url;
     } catch (error) {
       console.error('File upload failed:', error);
       throw error;
@@ -71,7 +71,7 @@ const CreateNewLab = () => {
     formData.append('file', file);
     try {
       const response = await axios.post(`http://localhost:4000/api/file/source_code/${id}`, formData);
-      return response.data.url;
+      return response.data.data.url;
     } catch (error) {
       console.error('File upload failed:', error);
       throw error;
@@ -82,7 +82,7 @@ const CreateNewLab = () => {
     formData.append('file', file);
     try {
       const response = await axios.post(`http://localhost:4000/api/file/stepImage/${id}/1`, formData);
-      return response.data.url;
+      return response.data.data.url;
     } catch (error) {
       console.error('File upload failed:', error);
       throw error;
@@ -96,7 +96,7 @@ const CreateNewLab = () => {
     const thumbdesc = editor1.current.value;
     const objective = editor2.current.value;
     const title = form.title.value;
-    const srccode = form.srccode.files[0];
+    const src = form.srccode.files[0];
     const cloudprovider = form.cloudprovider.value;
     const type = form.type.value;
     const difficulty = form.difficulty.value;
@@ -104,7 +104,7 @@ const CreateNewLab = () => {
 
     try {
       const thumbImageUrl = thumbFile ? await uploadFile(thumbFile,id):null;
-      const srccodeUrl = srccode ? await uploadZip(srccode,id) : null;
+      const srccodeUrl = src ? await uploadZip(src,id) : null;
 
       const steps = await Promise.all(step.map(async (step, index) => {
         const desc = stepEditors.current[index].current.value;
@@ -130,7 +130,7 @@ const CreateNewLab = () => {
       };
 
       // Logging the newLab object to the console
-      console.log(newLab);
+      console.log("newLab",newLab);
 
       // Make your API call here to save the newLab data
       try {
