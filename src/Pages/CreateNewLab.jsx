@@ -53,7 +53,6 @@ const CreateNewLab = () => {
     try {
       const response = await axios.post(`http://localhost:4000/api/file/image/${id}`, formData);
       return response.data.data.url;
-      return response.data.data.url;
     } catch (error) {
       console.error('File upload failed:', error);
       throw error;

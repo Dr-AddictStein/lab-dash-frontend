@@ -22,11 +22,11 @@ const LabDetails = () => {
     fetchLabs();
   }, [labId]);
 
-  const [steps,setSteps] = useState([]);
+  const [steps, setSteps] = useState([]);
   useEffect(() => {
     console.log("SSS", lab);
-    if(lab){
-        setSteps(lab.steps)
+    if (lab) {
+      setSteps(lab.steps)
     }
   }, [lab]);
 
@@ -47,8 +47,8 @@ const LabDetails = () => {
           <h3 className="text-center text-2xl font-semibold my-5 w-11/12 mx-auto">
             {lab.title}
           </h3>
-          <div className="w-full  overflow-hidden object-cover rounded-md border border-base-300">
-            <img src="" alt="" />
+          <div className="w-full flex items-center justify-center overflow-hidden object-cover rounded-md border border-base-300">
+            <img src={lab.thumbnail} alt="" />
           </div>
           <div className="my-5">
             <h3 className="text-2xl font-semibold mb-2">Lab Description</h3>
@@ -84,9 +84,8 @@ const LabDetails = () => {
                 </p>
               </div>
               <div
-                className={`collapse-content ${
-                  openStep === index ? "block" : "hidden"
-                }`}
+                className={`collapse-content ${openStep === index ? "block" : "hidden"
+                  }`}
               >
                 <div>
                   <div className="my-5">
@@ -95,12 +94,21 @@ const LabDetails = () => {
                       {parse(step.desc)}
                     </p>
                   </div>
+                  <div className="flex justify-center gap-3">
+                    {
+                      step.fileUrls.map(i => {
+                        return (
+                          <img src={i} alt="" className="w-1/3" />
+                        )
+                      })
+                    }
+                  </div>
                 </div>
               </div>
             </div>
           ))}
           <div>
-            <Link to={"/updatelab/"+labId}>
+            <Link to={"/updatelab/" + labId}>
               <button className="p-3 rounded-md border border-base-300">
                 Update Lab
               </button>

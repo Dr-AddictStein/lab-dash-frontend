@@ -16,6 +16,8 @@ const UpdateLab = () => {
     srccode: "",
     thumbnail: "",
     steps: [],
+    isPublished:true,
+    isDeleted:false
   });
   const [step, setStep] = useState([]);
   const editor1 = useRef(null);
@@ -80,7 +82,7 @@ const UpdateLab = () => {
     formData.append('file', file);
     try {
       const response = await axios.post(`http://localhost:4000/api/file/image/${id}`, formData);
-      return response.data.url;
+      return response.data.data.url;
     } catch (error) {
       console.error('File upload failed:', error);
       throw error;
@@ -92,7 +94,7 @@ const UpdateLab = () => {
     formData.append('file', file);
     try {
       const response = await axios.post(`http://localhost:4000/api/file/source_code/${id}`, formData);
-      return response.data.url;
+      return response.data.data.url;
     } catch (error) {
       console.error('File upload failed:', error);
       throw error;
@@ -104,7 +106,7 @@ const UpdateLab = () => {
     formData.append('file', file);
     try {
       const response = await axios.post(`http://localhost:4000/api/file/stepImage/${id}/1`, formData);
-      return response.data.url;
+      return response.data.data.url;
     } catch (error) {
       console.error('File upload failed:', error);
       throw error;
@@ -122,21 +124,32 @@ const UpdateLab = () => {
     const cloudprovider = form.cloudprovider.value;
     const type = form.type.value;
     const difficulty = form.difficulty.value;
-
+  
     try {
       const thumbImageUrl = thumbFile ? await uploadFile(thumbFile, labId) : lab.thumbnail;
       const srccodeUrl = srccode ? await uploadZip(srccode, labId) : lab.srccode;
-
+  
       const steps = await Promise.all(step.map(async (step, index) => {
-        const desc = stepEditors.current[index]?.current?.value;
-        const fileUrls = await Promise.all(step.files.flat().map(file => uploadStepImage(file, labId)));
+        const desc = stepEditors.current[index]?.current?.value || step.desc;
+        const existingFileUrls = step.fileUrls || [];
+  
+        const updatedFileUrls = await Promise.all(
+          step.files.map(async (fileSet, fileIndex) => {
+            if (fileSet.length > 0) {
+              return await Promise.all(fileSet.map(file => uploadStepImage(file, labId)));
+            } else {
+              return existingFileUrls[fileIndex] || [];
+            }
+          })
+        );
+  
         return {
-          name: step.name,
+          ...step,
           desc,
-          fileUrls,
+          fileUrls: updatedFileUrls.flat() // Flatten the array of arrays
         };
       }));
-
+  
       const updatedLab = {
         id: labId,
         title,
@@ -148,14 +161,17 @@ const UpdateLab = () => {
         srccode: srccodeUrl,
         thumbnail: thumbImageUrl,
         steps,
+        isDeleted: false,
+        isPublished: true
       };
-
+  
       await updateLabCollection(labId, updatedLab);
       navigate('/labdetails/' + labId); // Redirect to lab details page after successful update
     } catch (error) {
       console.error('Error updating lab:', error);
     }
   };
+  
 
   return (
     <div className="w-11/12 mx-auto">
