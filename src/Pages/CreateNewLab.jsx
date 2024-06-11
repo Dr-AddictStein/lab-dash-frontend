@@ -55,12 +55,34 @@ const CreateNewLab = () => {
     );
   };
 
-  const uploadFile = async (file) => {
+  const uploadFile = async (file,id) => {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const response = await axios.post('', formData);
-      return response.data.fileUrl;
+      const response = await axios.post(`http://localhost:4000/api/file/image/${id}`, formData);
+      return response.data.url;
+    } catch (error) {
+      console.error('File upload failed:', error);
+      throw error;
+    }
+  };
+  const uploadZip = async (file,id) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const response = await axios.post(`http://localhost:4000/api/file/source_code/${id}`, formData);
+      return response.data.url;
+    } catch (error) {
+      console.error('File upload failed:', error);
+      throw error;
+    }
+  };
+  const uploadStepImage = async (file,id) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const response = await axios.post(`http://localhost:4000/api/file/stepImage/${id}/1`, formData);
+      return response.data.url;
     } catch (error) {
       console.error('File upload failed:', error);
       throw error;
@@ -78,14 +100,15 @@ const CreateNewLab = () => {
     const cloudprovider = form.cloudprovider.value;
     const type = form.type.value;
     const difficulty = form.difficulty.value;
+    const id = Date.now().toString();
 
     try {
-      const thumbImageUrl = await uploadFile(thumbFile);
-      const srccodeUrl = srccode ? await uploadFile(srccode) : null;
+      const thumbImageUrl = thumbFile ? await uploadFile(thumbFile,id):null;
+      const srccodeUrl = srccode ? await uploadZip(srccode,id) : null;
 
       const steps = await Promise.all(step.map(async (step, index) => {
         const desc = stepEditors.current[index].current.value;
-        const fileUrls = await Promise.all(step.files.flat().map(file => uploadFile(file)));
+        const fileUrls = await Promise.all(step.files.flat().map(file => uploadStepImage(file)));
         return {
           name: step.name,
           desc,
@@ -94,6 +117,7 @@ const CreateNewLab = () => {
       }));
 
       const newLab = {
+        id,
         title,
         desc: thumbdesc,
         objective,
@@ -183,6 +207,7 @@ const CreateNewLab = () => {
               name="cloudprovider"
               className="select select-bordered w-full"
               onChange={handleChange}
+              defaultValue="Google Cloud"
             >
               <option disabled selected>Select Cloud Provider</option>
               <option>Google Cloud</option>
@@ -197,6 +222,7 @@ const CreateNewLab = () => {
               name="type"
               className="select select-bordered w-full"
               onChange={handleChange}
+              defaultValue="Data Science/ML"
             >
               <option disabled selected>Lab Type</option>
               <option>Data Science/ML</option>
@@ -210,6 +236,7 @@ const CreateNewLab = () => {
               name="difficulty"
               className="select select-bordered w-full"
               onChange={handleChange}
+              defaultValue="Beginner"
             >
               <option disabled selected>Difficulty Level</option>
               <option>Beginner</option>

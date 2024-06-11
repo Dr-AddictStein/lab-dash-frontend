@@ -127,7 +127,7 @@ const LabListing = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredLabs.map((ld) => (
+            {labs.map((ld) => (
               <tr key={ld.id}>
                 <td className="w-[5%] text-center">{ld.id}</td>
                 <td className="w-full text-center">{ld.title}</td>
