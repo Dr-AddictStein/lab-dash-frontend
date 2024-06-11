@@ -1,85 +1,122 @@
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import JoditEditor from 'jodit-react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { addLabCollection } from '../services/labServices';
 
 const CreateNewLab = () => {
-  const [lab, setLab] = useState({
-    title: '',
-    desc: '',
-    objective: '',
-    cloudprovider: 'Google Cloud',
-    type: 'Data Science/ML',
-    difficulty: 'Beginner',
-    srccode: '',
-    thumbnail: '',
-    steps: [],
-    isPublished: true,
-    isDeleted: false
-  });
+  const [step, setStep] = useState([]);
   const editor1 = useRef(null);
   const editor2 = useRef(null);
   const stepEditors = useRef([]);
   const navigate = useNavigate();
 
+  const addStep = () => {
+    setStep([...step, { id: step.length, name: '', desc: '', expanded: false, files: [[], [], []] }]);
+    stepEditors.current.push(React.createRef());
+  };
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setLab((prevLab) => ({ ...prevLab, [name]: value }));
+    // Handle form change logic if needed
   };
 
   const handleFileChange = (e) => {
-    const { name, files } = e.target;
-    setLab((prevLab) => ({ ...prevLab, [name]: files[0] }));
+    // Handle file change logic if needed
   };
 
   const handleStepChange = (index, e) => {
     const { name, value } = e.target;
-    const updatedSteps = lab.steps.map((step, i) =>
+    const updatedSteps = step.map((step, i) =>
       i === index ? { ...step, [name]: value } : step
     );
-    setLab((prevLab) => ({ ...prevLab, steps: updatedSteps }));
+    setStep(updatedSteps);
   };
 
   const handleStepEditorChange = (index, value) => {
-    const updatedSteps = lab.steps.map((step, i) =>
+    const updatedSteps = step.map((step, i) =>
       i === index ? { ...step, desc: value } : step
     );
-    setLab((prevLab) => ({ ...prevLab, steps: updatedSteps }));
+    setStep(updatedSteps);
   };
 
-  const addStep = () => {
-    setLab((prevLab) => ({
-      ...prevLab,
-      steps: [...prevLab.steps, { name: '', desc: '', expanded: false }],
-    }));
-    stepEditors.current.push(null);
+  const handleStepFileChange = (index, fileIndex, e) => {
+    const files = Array.from(e.target.files);
+    const updatedSteps = step.map((step, i) =>
+      i === index ? { ...step, files: step.files.map((fileSet, j) => (j === fileIndex ? files : fileSet)) } : step
+    );
+    setStep(updatedSteps);
   };
 
   const toggleStep = (index) => {
-    setLab((prevLab) => ({
-      ...prevLab,
-      steps: prevLab.steps.map((step, i) =>
+    setStep((prevStep) =>
+      prevStep.map((step, i) =>
         i === index ? { ...step, expanded: !step.expanded } : step
-      ),
-    }));
+      )
+    );
+  };
+
+  const uploadFile = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const response = await axios.post('', formData);
+      return response.data.fileUrl;
+    } catch (error) {
+      console.error('File upload failed:', error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const labData = {
-      ...lab,
-      desc: editor1.current.value,
-      objective: editor2.current.value,
-      steps: lab.steps.map((step, index) => ({
-        ...step,
-        desc: stepEditors.current[index].value,
-      })),
-    };
+    const form = e.target;
+    const thumbFile = form.thumbnail.files[0];
+    const thumbdesc = editor1.current.value;
+    const objective = editor2.current.value;
+    const title = form.title.value;
+    const srccode = form.srccode.files[0];
+    const cloudprovider = form.cloudprovider.value;
+    const type = form.type.value;
+    const difficulty = form.difficulty.value;
+
     try {
-      await addLabCollection(labData);
-      navigate('/'); // Redirect to home or another page after successful submission
+      const thumbImageUrl = await uploadFile(thumbFile);
+      const srccodeUrl = srccode ? await uploadFile(srccode) : null;
+
+      const steps = await Promise.all(step.map(async (step, index) => {
+        const desc = stepEditors.current[index].current.value;
+        const fileUrls = await Promise.all(step.files.flat().map(file => uploadFile(file)));
+        return {
+          name: step.name,
+          desc,
+          fileUrls,
+        };
+      }));
+
+      const newLab = {
+        title,
+        desc: thumbdesc,
+        objective,
+        cloudprovider,
+        type,
+        difficulty,
+        srccode: srccodeUrl,
+        thumbnail: thumbImageUrl,
+        steps,
+      };
+
+      // Logging the newLab object to the console
+      console.log(newLab);
+
+      // Make your API call here to save the newLab data
+      try {
+        await addLabCollection(newLab);
+        navigate('/'); // Redirect to home or another page after successful submission
+      } catch (error) {
+        console.error('Error creating new lab:', error);
+      }
     } catch (error) {
-      console.error('Error creating new lab:', error);
+      console.error('Error submitting lab:', error);
     }
   };
 
@@ -88,7 +125,8 @@ const CreateNewLab = () => {
       <h3 className="text-2xl text-center font-semibold">Create New Lab</h3>
       <div className="mt-10 flex gap-3 justify-end">
         <button
-          onClick={handleSubmit}
+          type="submit"
+          form="lab-form"
           className="py-2 w-20 rounded-md border border-base-300"
         >
           Save
@@ -99,7 +137,7 @@ const CreateNewLab = () => {
           </button>
         </Link>
       </div>
-      <form onSubmit={handleSubmit}>
+      <form id="lab-form" onSubmit={handleSubmit}>
         <div className="my-3">
           <label htmlFor="labTitle">Lab Title</label>
           <input
@@ -107,7 +145,6 @@ const CreateNewLab = () => {
             name="title"
             className="w-full border border-base-300 rounded-md p-2"
             placeholder="Enter Lab Title"
-            value={lab.title}
             onChange={handleChange}
           />
         </div>
@@ -141,14 +178,13 @@ const CreateNewLab = () => {
         </div>
         <div className="flex gap-3 my-6">
           <div className="flex flex-col w-full">
-            <div className=" mb-2">Select Cloud Provider</div>
+            <div className="mb-2">Select Cloud Provider</div>
             <select
               name="cloudprovider"
               className="select select-bordered w-full"
-              value={lab.cloudprovider}
               onChange={handleChange}
             >
-              <option disabled>Select Cloud Provider</option>
+              <option disabled selected>Select Cloud Provider</option>
               <option>Google Cloud</option>
               <option>AWS</option>
               <option>Snowflake</option>
@@ -156,51 +192,47 @@ const CreateNewLab = () => {
             </select>
           </div>
           <div className="flex flex-col w-full">
-            <div className=" mb-2">Select Lab Type</div>
+            <div className="mb-2">Select Lab Type</div>
             <select
               name="type"
               className="select select-bordered w-full"
-              value={lab.type}
               onChange={handleChange}
             >
-              <option disabled>Lab Type</option>
+              <option disabled selected>Lab Type</option>
               <option>Data Science/ML</option>
               <option>Data Engineering/MLOps</option>
               <option>AI/LLM</option>
             </select>
           </div>
           <div className="flex flex-col w-full">
-            <div className=" mb-2">Select Difficulty Level</div>
+            <div className="mb-2">Select Difficulty Level</div>
             <select
               name="difficulty"
               className="select select-bordered w-full"
-              value={lab.difficulty}
               onChange={handleChange}
             >
-              <option disabled>Difficulty Level</option>
+              <option disabled selected>Difficulty Level</option>
               <option>Beginner</option>
               <option>Intermediate/Advanced</option>
             </select>
           </div>
         </div>
         <div>
-          {lab.steps.map((step, index) => (
+          {step.map((step, index) => (
             <div
               key={index}
               className="collapse collapse-arrow border border-base-300 rounded-md mb-2"
             >
               <input
                 type="checkbox"
-                name={`my-accordion-${index}`}
+                className="collapse-checkbox"
                 checked={step.expanded}
                 onChange={() => toggleStep(index)}
               />
               <div className="collapse-title text-xl font-medium">
                 <p>Step {index + 1}</p>
               </div>
-              <div
-                className={`collapse-content ${step.expanded ? 'block' : 'hidden'}`}
-              >
+              <div className={`collapse-content ${step.expanded ? 'block' : 'hidden'}`}>
                 <div>
                   <div>
                     <label htmlFor="stepName">Step Name</label>
@@ -215,15 +247,23 @@ const CreateNewLab = () => {
                   </div>
                   <div className="my-3">
                     <label htmlFor="stepDesc">Step Description</label>
-                    {/* <JoditEditor
+                    <JoditEditor
                       ref={(el) => (stepEditors.current[index] = el)}
                       value={step.desc}
                       onBlur={(newContent) => handleStepEditorChange(index, newContent)}
-                    /> */}
-                    <JoditEditor
-                    ref={(el) => (stepEditors.current[index] = el)}
-                    value={step.desc} 
-                    onBlur={(newContent) => handleStepEditorChange(index, newContent)}/>
+                    />
+                  </div>
+                  <div className='flex gap-3'>
+                    {/* Render three file inputs for each step */}
+                    {step.files.map((fileSet, fileIndex) => (
+                      <input
+                        key={fileIndex}
+                        type="file"
+                        name={`file-${index}-${fileIndex}`}
+                        className="file-input file-input-bordered w-full"
+                        onChange={(e) => handleStepFileChange(index, fileIndex, e)}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
@@ -245,3 +285,4 @@ const CreateNewLab = () => {
 };
 
 export default CreateNewLab;
+
