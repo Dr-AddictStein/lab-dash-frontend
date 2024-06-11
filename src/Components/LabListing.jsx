@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { deleteLabCollection, getLabCollections, updateLabCollection } from "../services/labServices";
+import moment from "moment";
 
 const LabListing = () => {
   const [labs, setLabs] = useState([]);
@@ -26,7 +27,7 @@ const LabListing = () => {
 
   const handleDelete = async (e) => {
     e.preventDefault();
-    const lab = labs.filter((l) => l.id === parseInt(e.target.value))[0];
+    const lab = labs.filter((l) => l.id === e.target.value)[0];
     const labData = {
       ...lab,
       isDeleted: true,
@@ -41,7 +42,8 @@ const LabListing = () => {
 
   const handleUnpublish = async (e) => {
     e.preventDefault();
-    const lab = labs.filter((l) => l.id === parseInt(e.target.value))[0];
+    const lab = labs.filter((l) => l.id === e.target.value)[0];
+    console.log("SOSO", lab)
     const labData = {
       ...lab,
       isPublished: false,
@@ -81,9 +83,45 @@ const LabListing = () => {
     setFilteredLabs(filtered);
   };
 
-  const handleCloudChange = (e) => setCloud(e.target.value);
-  const handleTypeChange = (e) => setType(e.target.value);
-  const handleDifficultyChange = (e) => setDifficulty(e.target.value);
+  const handleCloudChange = (e) => {
+    let cp;
+    if(e.target.value==="Google Cloud"){
+      cp=1;
+    }
+    else if(e.target.value==="AWS"){
+      cp=2;
+    }
+    else if(e.target.value==="Snowflake"){
+      cp=3;
+    }
+    else if(e.target.value==="Azure Cloud"){
+      cp=4;
+    }
+    setCloud(cp);
+  }
+  const handleTypeChange = (e) => {
+    let cp;
+    if(e.target.value==="Data Science/ML"){
+      cp=1;
+    }
+    else if(e.target.value==="Data Engineering/MLOps"){
+      cp=2;
+    }
+    else if(e.target.value==="AI/LLM"){
+      cp=3;
+    }
+    setCloud(cp);
+  }
+  const handleDifficultyChange = (e) => {
+    let cp;
+    if(e.target.value==="Beginner"){
+      cp=1;
+    }
+    else if(e.target.value==="Intermediate/Advanced"){
+      cp=2;
+    }
+    setCloud(cp);
+  }
 
   return (
     <div>
@@ -123,14 +161,16 @@ const LabListing = () => {
             <tr>
               <th className="text-center">Lab ID</th>
               <th className="text-center">Lab Name</th>
+              <th className="text-center">Lab Created at</th>
               <th className="text-center">Action</th>
             </tr>
           </thead>
           <tbody>
-            {labs.map((ld) => (
+            {filteredLabs.map((ld) => (
               <tr key={ld.id}>
                 <td className="w-[5%] text-center">{ld.id}</td>
-                <td className="w-full text-center">{ld.title}</td>
+                <td className="w-[50%] text-center">{ld.title}</td>
+                <td className="w-full text-center">{moment.unix((ld.id/1000)).format("MMMM DD, YYYY")}</td>
                 <td className="flex gap-4">
                   <Link to={"/labdetails/" + ld.id}>
                     <button className="w-24 py-1 rounded-md border border-base-300">

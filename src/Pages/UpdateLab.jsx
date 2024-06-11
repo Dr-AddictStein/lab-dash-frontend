@@ -16,8 +16,8 @@ const UpdateLab = () => {
     srccode: "",
     thumbnail: "",
     steps: [],
-    isPublished:true,
-    isDeleted:false
+    isPublished: true,
+    isDeleted: false
   });
   const [step, setStep] = useState([]);
   const editor1 = useRef(null);
@@ -124,15 +124,50 @@ const UpdateLab = () => {
     const cloudprovider = form.cloudprovider.value;
     const type = form.type.value;
     const difficulty = form.difficulty.value;
-  
+
+    let cp = cloudprovider;
+    if (cloudprovider === "Google Cloud") {
+      cp = 1;
+    }
+    else if (cloudprovider === "AWS") {
+      cp = 2;
+    }
+    else if (cloudprovider === "Snowflake") {
+      cp = 3;
+    }
+    else if (cloudprovider === "Azure Cloud") {
+      cp = 4;
+    }
+
+
+    let tp = type;
+    if (type === "Data Science/ML") {
+      tp = 1;
+    }
+    else if (type === "Data Engineering/MLOps") {
+      tp = 2;
+    }
+    else if (type === "AI/LLM") {
+      tp = 3;
+    }
+
+
+    let diff = difficulty;
+    if (difficulty === "Beginner") {
+      diff = 1;
+    }
+    else if (difficulty === "Intermediate/Advanced") {
+      diff = 2;
+    }
+
     try {
       const thumbImageUrl = thumbFile ? await uploadFile(thumbFile, labId) : lab.thumbnail;
       const srccodeUrl = srccode ? await uploadZip(srccode, labId) : lab.srccode;
-  
+
       const steps = await Promise.all(step.map(async (step, index) => {
         const desc = stepEditors.current[index]?.current?.value || step.desc;
         const existingFileUrls = step.fileUrls || [];
-  
+
         const updatedFileUrls = await Promise.all(
           step.files.map(async (fileSet, fileIndex) => {
             if (fileSet.length > 0) {
@@ -142,36 +177,36 @@ const UpdateLab = () => {
             }
           })
         );
-  
+
         return {
           ...step,
           desc,
           fileUrls: updatedFileUrls.flat() // Flatten the array of arrays
         };
       }));
-  
+
       const updatedLab = {
         id: labId,
         title,
         desc: thumbdesc,
         objective,
-        cloudprovider,
-        type,
-        difficulty,
+        cloudprovider:cp,
+        type:tp,
+        difficulty:diff,
         srccode: srccodeUrl,
         thumbnail: thumbImageUrl,
         steps,
         isDeleted: false,
         isPublished: true
       };
-  
+
       await updateLabCollection(labId, updatedLab);
       navigate('/labdetails/' + labId); // Redirect to lab details page after successful update
     } catch (error) {
       console.error('Error updating lab:', error);
     }
   };
-  
+
 
   return (
     <div className="w-11/12 mx-auto">

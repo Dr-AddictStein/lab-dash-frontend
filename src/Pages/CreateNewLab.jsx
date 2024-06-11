@@ -96,9 +96,44 @@ const CreateNewLab = () => {
     const difficulty = form.difficulty.value;
     const id = Date.now().toString();
 
+    let cp = cloudprovider;
+    if (cloudprovider === "Google Cloud") {
+      cp = 1;
+    }
+    else if (cloudprovider === "AWS") {
+      cp = 2;
+    }
+    else if (cloudprovider === "Snowflake") {
+      cp = 3;
+    }
+    else if (cloudprovider === "Azure Cloud") {
+      cp = 4;
+    }
+
+
+    let tp = type;
+    if (type === "Data Science/ML") {
+      tp = 1;
+    }
+    else if (type === "Data Engineering/MLOps") {
+      tp = 2;
+    }
+    else if (type === "AI/LLM") {
+      tp = 3;
+    }
+
+
+    let diff = difficulty;
+    if (difficulty === "Beginner") {
+      diff = 1;
+    }
+    else if (difficulty === "Intermediate/Advanced") {
+      diff = 2;
+    }
+
     try {
-      const thumbImageUrl = thumbFile ? await uploadFile(thumbFile,id):null;
-      const srccodeUrl = src ? await uploadZip(src,id) : null;
+      const thumbImageUrl = thumbFile ? await uploadFile(thumbFile, id) : null;
+      const srccodeUrl = src ? await uploadZip(src, id) : null;
 
       const steps = await Promise.all(step.map(async (step, index) => {
         const desc = stepEditors.current[index]?.current?.value;
@@ -115,16 +150,18 @@ const CreateNewLab = () => {
         title,
         desc: thumbdesc,
         objective,
-        cloudprovider,
-        type,
-        difficulty,
+        cloudprovider:cp,
+        type:tp,
+        difficulty:diff,
         srccode: srccodeUrl,
         thumbnail: thumbImageUrl,
         steps,
+        isPublished:true,
+        isDeleted:false
       };
 
       // Logging the newLab object to the console
-      console.log("newLab",newLab);
+      console.log("newLab", newLab);
 
       // Make your API call here to save the newLab data
       try {
