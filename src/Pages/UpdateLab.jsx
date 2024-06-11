@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import JoditEditor from "jodit-react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { getLabCollection, updateLabCollection } from "../services/labServices";
-import parse from 'html-react-parser';
+import React, { useEffect, useRef, useState } from 'react';
+import JoditEditor from 'jodit-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
+import { getLabCollection, updateLabCollection } from '../services/labServices';
 
 const UpdateLab = () => {
   const { labId } = useParams();
@@ -16,11 +16,11 @@ const UpdateLab = () => {
     srccode: "",
     thumbnail: "",
     steps: [],
-    isPublished: true,
-    isDeleted: false,
   });
+  const [step, setStep] = useState([]);
   const editor1 = useRef(null);
   const editor2 = useRef(null);
+  const stepEditors = useRef([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,6 +29,13 @@ const UpdateLab = () => {
         const response = await getLabCollection(labId);
         const labData = response.data;
         setLab(labData);
+        setStep(labData.steps.map((step, index) => ({
+          ...step,
+          expanded: false,
+          files: [[], [], []],
+          editorRef: React.createRef()
+        })));
+        stepEditors.current = labData.steps.map(() => React.createRef());
       } catch (error) {
         console.error("Error fetching lab data:", error);
       }
@@ -37,55 +44,116 @@ const UpdateLab = () => {
     fetchLab();
   }, [labId]);
 
-  const handleChange = (e) => {
+  const handleStepChange = (index, e) => {
     const { name, value } = e.target;
-    setLab((prevLab) => ({ ...prevLab, [name]: value }));
+    const updatedSteps = step.map((step, i) =>
+      i === index ? { ...step, [name]: value } : step
+    );
+    setStep(updatedSteps);
   };
 
-  const handleFileChange = (e) => {
-    const { name, files } = e.target;
-    setLab((prevLab) => ({ ...prevLab, [name]: files[0] }));
+  const handleStepEditorChange = (index, value) => {
+    const updatedSteps = step.map((step, i) =>
+      i === index ? { ...step, desc: value } : step
+    );
+    setStep(updatedSteps);
   };
 
-  const handleStepChange = (index, value) => {
-    if (typeof value.target.value === 'string') {
-      const updatedSteps = lab.steps.map((step, i) =>
-        i === index ? { ...step, name: value.target.value } : step
-      );
-      setLab((prevLab) => ({ ...prevLab, steps: updatedSteps }));
-    } else {
-      console.error("Unexpected value type in handleStepChange:", value);
-    }
-  };
-
-  const addStep = () => {
-    setLab((prevLab) => ({
-      ...prevLab,
-      steps: [...prevLab.steps, { name: "", desc: "", expanded: false }],
-    }));
+  const handleStepFileChange = (index, fileIndex, e) => {
+    const files = Array.from(e.target.files);
+    const updatedSteps = step.map((step, i) =>
+      i === index ? { ...step, files: step.files.map((fileSet, j) => (j === fileIndex ? files : fileSet)) } : step
+    );
+    setStep(updatedSteps);
   };
 
   const toggleStep = (index) => {
-    setLab((prevLab) => ({
-      ...prevLab,
-      steps: prevLab.steps.map((step, i) =>
+    setStep((prevStep) =>
+      prevStep.map((step, i) =>
         i === index ? { ...step, expanded: !step.expanded } : step
-      ),
-    }));
+      )
+    );
+  };
+
+  const uploadFile = async (file, id) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const response = await axios.post(`http://localhost:4000/api/file/image/${id}`, formData);
+      return response.data.url;
+    } catch (error) {
+      console.error('File upload failed:', error);
+      throw error;
+    }
+  };
+
+  const uploadZip = async (file, id) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const response = await axios.post(`http://localhost:4000/api/file/source_code/${id}`, formData);
+      return response.data.url;
+    } catch (error) {
+      console.error('File upload failed:', error);
+      throw error;
+    }
+  };
+
+  const uploadStepImage = async (file, id) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const response = await axios.post(`http://localhost:4000/api/file/stepImage/${id}/1`, formData);
+      return response.data.url;
+    } catch (error) {
+      console.error('File upload failed:', error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const labData = {
-      ...lab,
-      desc: editor1.current.value,
-      objective: editor2.current.value,
-    };
+    const form = e.target;
+    const thumbFile = form.thumbnail.files[0];
+    const thumbdesc = editor1.current.value;
+    const objective = editor2.current.value;
+    const title = form.title.value;
+    const srccode = form.srccode.files[0];
+    const cloudprovider = form.cloudprovider.value;
+    const type = form.type.value;
+    const difficulty = form.difficulty.value;
+
     try {
-      await updateLabCollection(labId, labData);
-      navigate("/labdetails/" + labId); // Redirect to home or another page after successful update
+      const thumbImageUrl = thumbFile ? await uploadFile(thumbFile, labId) : lab.thumbnail;
+      const srccodeUrl = srccode ? await uploadZip(srccode, labId) : lab.srccode;
+
+      const steps = await Promise.all(step.map(async (step, index) => {
+        const desc = stepEditors.current[index]?.current?.value;
+        const fileUrls = await Promise.all(step.files.flat().map(file => uploadStepImage(file, labId)));
+        return {
+          name: step.name,
+          desc,
+          fileUrls,
+        };
+      }));
+
+      const updatedLab = {
+        id: labId,
+        title,
+        desc: thumbdesc,
+        objective,
+        cloudprovider,
+        type,
+        difficulty,
+        srccode: srccodeUrl,
+        thumbnail: thumbImageUrl,
+        steps,
+      };
+
+      await updateLabCollection(labId, updatedLab);
+      navigate('/labdetails/' + labId); // Redirect to lab details page after successful update
     } catch (error) {
-      console.error("Error updating lab:", error);
+      console.error('Error updating lab:', error);
     }
   };
 
@@ -94,18 +162,19 @@ const UpdateLab = () => {
       <h3 className="text-2xl text-center font-semibold">Update Lab</h3>
       <div className="mt-10 flex gap-3 justify-end">
         <button
-          onClick={handleSubmit}
+          type="submit"
+          form="lab-form"
           className="py-2 w-20 rounded-md border border-base-300"
         >
           Save
         </button>
-        <Link to={"/"}>
+        <Link to={'/'}>
           <button className="py-2 w-20 rounded-md border border-base-300">
             Cancel
           </button>
         </Link>
       </div>
-      <form onSubmit={handleSubmit}>
+      <form id="lab-form" onSubmit={handleSubmit}>
         <div className="my-3">
           <label htmlFor="labTitle">Lab Title</label>
           <input
@@ -114,28 +183,16 @@ const UpdateLab = () => {
             className="w-full border border-base-300 rounded-md p-2"
             placeholder="Enter Lab Title"
             value={lab.title}
-            onChange={handleChange}
+            onChange={(e) => setLab({ ...lab, title: e.target.value })}
           />
         </div>
         <div className="my-3">
           <label htmlFor="labDesc">Lab Description</label>
-          <JoditEditor
-            ref={editor1}
-            value={lab.desc}
-            onBlur={(newContent) =>
-              setLab((prevLab) => ({ ...prevLab, desc: newContent }))
-            }
-          />
+          <JoditEditor ref={editor1} value={lab.desc} />
         </div>
         <div className="my-3">
           <label htmlFor="labObj">Lab Objective and Tech Stack</label>
-          <JoditEditor
-            ref={editor2}
-            value={lab.objective}
-            onBlur={(newContent) =>
-              setLab((prevLab) => ({ ...prevLab, objective: newContent }))
-            }
-          />
+          <JoditEditor ref={editor2} value={lab.objective} />
         </div>
         <div className="flex gap-3">
           <div>
@@ -144,7 +201,6 @@ const UpdateLab = () => {
               type="file"
               name="srccode"
               className="file-input file-input-bordered w-full"
-              onChange={handleFileChange}
             />
           </div>
           <div>
@@ -153,18 +209,17 @@ const UpdateLab = () => {
               type="file"
               name="thumbnail"
               className="file-input file-input-bordered w-full"
-              onChange={handleFileChange}
             />
           </div>
         </div>
         <div className="flex gap-3 my-6">
           <div className="flex flex-col w-full">
-            <div className=" mb-2">Select Cloud Provider</div>
+            <div className="mb-2">Select Cloud Provider</div>
             <select
               name="cloudprovider"
               className="select select-bordered w-full"
               value={lab.cloudprovider}
-              onChange={handleChange}
+              onChange={(e) => setLab({ ...lab, cloudprovider: e.target.value })}
             >
               <option disabled>Select Cloud Provider</option>
               <option>Google Cloud</option>
@@ -174,12 +229,12 @@ const UpdateLab = () => {
             </select>
           </div>
           <div className="flex flex-col w-full">
-            <div className=" mb-2">Select Lab Type</div>
+            <div className="mb-2">Select Lab Type</div>
             <select
               name="type"
               className="select select-bordered w-full"
               value={lab.type}
-              onChange={handleChange}
+              onChange={(e) => setLab({ ...lab, type: e.target.value })}
             >
               <option disabled>Lab Type</option>
               <option>Data Science/ML</option>
@@ -188,12 +243,12 @@ const UpdateLab = () => {
             </select>
           </div>
           <div className="flex flex-col w-full">
-            <div className=" mb-2">Select Difficulty Level</div>
+            <div className="mb-2">Select Difficulty Level</div>
             <select
               name="difficulty"
               className="select select-bordered w-full"
               value={lab.difficulty}
-              onChange={handleChange}
+              onChange={(e) => setLab({ ...lab, difficulty: e.target.value })}
             >
               <option disabled>Difficulty Level</option>
               <option>Beginner</option>
@@ -201,26 +256,23 @@ const UpdateLab = () => {
             </select>
           </div>
         </div>
-        <div>
-          {lab.steps.map((step, index) => (
+        <div className="my-3">
+          <h4 className="text-lg font-semibold">Steps</h4>
+          {step.map((step, index) => (
             <div
               key={index}
               className="collapse collapse-arrow border border-base-300 rounded-md mb-2"
             >
               <input
                 type="checkbox"
-                name={`my-accordion-${index}`}
+                className="collapse-checkbox"
                 checked={step.expanded}
                 onChange={() => toggleStep(index)}
               />
               <div className="collapse-title text-xl font-medium">
                 <p>Step {index + 1}</p>
               </div>
-              <div
-                className={`collapse-content ${
-                  step.expanded ? "block" : "hidden"
-                }`}
-              >
+              <div className={`collapse-content ${step.expanded ? 'block' : 'hidden'}`}>
                 <div>
                   <div>
                     <label htmlFor="stepName">Step Name</label>
@@ -236,25 +288,45 @@ const UpdateLab = () => {
                   <div className="my-3">
                     <label htmlFor="stepDesc">Step Description</label>
                     <JoditEditor
+                      ref={stepEditors.current[index]}
                       value={step.desc}
-                      onBlur={(newContent) =>
-                        handleStepChange(index, newContent)
-                      }
+                      onBlur={(newContent) => handleStepEditorChange(index, newContent)}
                     />
+                  </div>
+                  <div className='flex gap-3'>
+                    {/* Render three file inputs for each step */}
+                    {step.files.map((fileSet, fileIndex) => (
+                      <input
+                        key={fileIndex}
+                        type="file"
+                        name={`file-${index}-${fileIndex}`}
+                        className="file-input file-input-bordered w-full"
+                        onChange={(e) => handleStepFileChange(index, fileIndex, e)}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
             </div>
           ))}
-          <div className="mb-5">
-            <button
-              type="button"
-              className="py-2 w-20 rounded-md border border-base-300"
-              onClick={addStep}
-            >
-              Add Step
-            </button>
-          </div>
+          <button
+            type="button"
+            className=" text-white px-3 py-1 rounded-md"
+            onClick={() =>
+              setStep([
+                ...step,
+                {
+                  name: "",
+                  desc: "",
+                  expanded: true,
+                  files: [[], [], []],
+                  editorRef: React.createRef()
+                },
+              ])
+            }
+          >
+            Add Step
+          </button>
         </div>
       </form>
     </div>
@@ -262,3 +334,4 @@ const UpdateLab = () => {
 };
 
 export default UpdateLab;
+

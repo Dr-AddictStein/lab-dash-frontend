@@ -16,14 +16,6 @@ const CreateNewLab = () => {
     stepEditors.current.push(React.createRef());
   };
 
-  const handleChange = (e) => {
-    // Handle form change logic if needed
-  };
-
-  const handleFileChange = (e) => {
-    // Handle file change logic if needed
-  };
-
   const handleStepChange = (index, e) => {
     const { name, value } = e.target;
     const updatedSteps = step.map((step, i) =>
@@ -55,18 +47,20 @@ const CreateNewLab = () => {
     );
   };
 
-  const uploadFile = async (file,id) => {
+  const uploadFile = async (file, id) => {
     const formData = new FormData();
     formData.append('file', file);
     try {
       const response = await axios.post(`http://localhost:4000/api/file/image/${id}`, formData);
+      return response.data.data.url;
       return response.data.data.url;
     } catch (error) {
       console.error('File upload failed:', error);
       throw error;
     }
   };
-  const uploadZip = async (file,id) => {
+
+  const uploadZip = async (file, id) => {
     const formData = new FormData();
     formData.append('file', file);
     try {
@@ -77,7 +71,8 @@ const CreateNewLab = () => {
       throw error;
     }
   };
-  const uploadStepImage = async (file,id) => {
+
+  const uploadStepImage = async (file, id) => {
     const formData = new FormData();
     formData.append('file', file);
     try {
@@ -107,8 +102,8 @@ const CreateNewLab = () => {
       const srccodeUrl = src ? await uploadZip(src,id) : null;
 
       const steps = await Promise.all(step.map(async (step, index) => {
-        const desc = stepEditors.current[index].current.value;
-        const fileUrls = await Promise.all(step.files.flat().map(file => uploadStepImage(file)));
+        const desc = stepEditors.current[index]?.current?.value;
+        const fileUrls = await Promise.all(step.files.flat().map(file => uploadStepImage(file, id)));
         return {
           name: step.name,
           desc,
@@ -169,7 +164,6 @@ const CreateNewLab = () => {
             name="title"
             className="w-full border border-base-300 rounded-md p-2"
             placeholder="Enter Lab Title"
-            onChange={handleChange}
           />
         </div>
         <div className="my-3">
@@ -187,7 +181,6 @@ const CreateNewLab = () => {
               type="file"
               name="srccode"
               className="file-input file-input-bordered w-full"
-              onChange={handleFileChange}
             />
           </div>
           <div>
@@ -196,7 +189,6 @@ const CreateNewLab = () => {
               type="file"
               name="thumbnail"
               className="file-input file-input-bordered w-full"
-              onChange={handleFileChange}
             />
           </div>
         </div>
@@ -206,7 +198,6 @@ const CreateNewLab = () => {
             <select
               name="cloudprovider"
               className="select select-bordered w-full"
-              onChange={handleChange}
               defaultValue="Google Cloud"
             >
               <option disabled selected>Select Cloud Provider</option>
@@ -221,7 +212,6 @@ const CreateNewLab = () => {
             <select
               name="type"
               className="select select-bordered w-full"
-              onChange={handleChange}
               defaultValue="Data Science/ML"
             >
               <option disabled selected>Lab Type</option>
@@ -235,7 +225,6 @@ const CreateNewLab = () => {
             <select
               name="difficulty"
               className="select select-bordered w-full"
-              onChange={handleChange}
               defaultValue="Beginner"
             >
               <option disabled selected>Difficulty Level</option>
@@ -275,7 +264,7 @@ const CreateNewLab = () => {
                   <div className="my-3">
                     <label htmlFor="stepDesc">Step Description</label>
                     <JoditEditor
-                      ref={(el) => (stepEditors.current[index] = el)}
+                      ref={stepEditors.current[index]}
                       value={step.desc}
                       onBlur={(newContent) => handleStepEditorChange(index, newContent)}
                     />
