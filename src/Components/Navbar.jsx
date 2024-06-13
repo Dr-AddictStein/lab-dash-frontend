@@ -2,8 +2,8 @@ import { Link } from "react-router-dom";
 
 const Navbar = () => {
     return (
-        <div className="h-[10vh] flex justify-center items-center">
-            <Link to="/" className="px-5 py-3  rounded-md border border-base-300 text-center">View Labs</Link>
+        <div className="h-[6vh] flex justify-center items-center">
+            <Link to="/" className="py-2 px-3 rounded-md border border-base-300">View Labs</Link>
         </div>
     );
 };
