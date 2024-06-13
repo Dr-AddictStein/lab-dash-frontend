@@ -384,7 +384,7 @@ const UpdateLab = () => {
           ))}
           <button
             type="button"
-            className=" text-white px-3 py-1 rounded-md"
+            className="py-2 w-20 rounded-md border border-base-300"
             onClick={() =>
               setStep([
                 ...step,

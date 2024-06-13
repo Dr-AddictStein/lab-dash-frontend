@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { deleteLabCollection, getLabCollections, updateLabCollection } from "../services/labServices";
 import moment from "moment";
+import ScaleLoader from "react-spinners/ScaleLoader";
 
 const LabListing = () => {
   const [labs, setLabs] = useState([]);
@@ -9,6 +10,7 @@ const LabListing = () => {
   const [cloud, setCloud] = useState("");
   const [type, setType] = useState("");
   const [difficulty, setDifficulty] = useState("");
+  const [loader, setLoader] = useState(true);
 
   const fetchLabs = async () => {
     try {
@@ -58,7 +60,12 @@ const LabListing = () => {
 
   useEffect(() => {
     filterLabs();
+    if (filteredLabs) {
+      setLoader(false);
+    }
   }, [cloud, type, difficulty, labs]);
+  useEffect(() => {
+  }, [labs]);
 
   const filterLabs = () => {
     console.log("Filtering labs with", { cloud, type, difficulty });
@@ -85,42 +92,58 @@ const LabListing = () => {
 
   const handleCloudChange = (e) => {
     let cp;
-    if(e.target.value==="Google Cloud"){
-      cp=1;
+    if (e.target.value === "Google Cloud") {
+      cp = 1;
     }
-    else if(e.target.value==="AWS"){
-      cp=2;
+    else if (e.target.value === "AWS") {
+      cp = 2;
     }
-    else if(e.target.value==="Snowflake"){
-      cp=3;
+    else if (e.target.value === "Snowflake") {
+      cp = 3;
     }
-    else if(e.target.value==="Azure Cloud"){
-      cp=4;
+    else if (e.target.value === "Azure Cloud") {
+      cp = 4;
     }
     setCloud(cp);
   }
   const handleTypeChange = (e) => {
     let cp;
-    if(e.target.value==="Data Science/ML"){
-      cp=1;
+    if (e.target.value === "Data Science/ML") {
+      cp = 1;
     }
-    else if(e.target.value==="Data Engineering/MLOps"){
-      cp=2;
+    else if (e.target.value === "Data Engineering/MLOps") {
+      cp = 2;
     }
-    else if(e.target.value==="AI/LLM"){
-      cp=3;
+    else if (e.target.value === "AI/LLM") {
+      cp = 3;
     }
     setCloud(cp);
   }
   const handleDifficultyChange = (e) => {
     let cp;
-    if(e.target.value==="Beginner"){
-      cp=1;
+    if (e.target.value === "Beginner") {
+      cp = 1;
     }
-    else if(e.target.value==="Intermediate/Advanced"){
-      cp=2;
+    else if (e.target.value === "Intermediate/Advanced") {
+      cp = 2;
     }
     setCloud(cp);
+  }
+
+  if (loader) {
+    return (
+      <div className="flex flex-col justify-center h-screen gap-16">
+        <div className="text-center text-slate-700 text-3xl">
+          Fetching Lab Details
+        </div>
+        <div className='w-full  flex justify-center items-center'>
+          <ScaleLoader
+            color='grey'
+            size={200}
+          />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -170,7 +193,7 @@ const LabListing = () => {
               <tr key={ld.id}>
                 <td className="w-[5%] text-center">{ld.id}</td>
                 <td className="w-[50%] text-center">{ld.title}</td>
-                <td className="w-full text-center">{moment.unix((ld.id/1000)).format("MMMM DD, YYYY")}</td>
+                <td className="w-full text-center">{moment.unix((ld.id / 1000)).format("MMMM DD, YYYY")}</td>
                 <td className="flex gap-4">
                   <Link to={"/labdetails/" + ld.id}>
                     <button className="w-24 py-1 rounded-md border border-base-300">
