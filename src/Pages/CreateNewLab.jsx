@@ -89,11 +89,11 @@ const CreateNewLab = () => {
     }
   };
 
-  const uploadStepImage = async (file, id) => {
+  const uploadStepImage = async (file, id,sid) => {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const response = await axios.post(`http://localhost:4000/api/file/stepImage/${id}/1`, formData);
+      const response = await axios.post(`http://localhost:4000/api/file/stepImage/${id}/${sid+1}`, formData);
       return response.data.data.url;
     } catch (error) {
       console.error('File upload failed:', error);
@@ -156,7 +156,7 @@ const CreateNewLab = () => {
 
       const steps = await Promise.all(step.map(async (step, index) => {
         const desc = stepEditors.current[index]?.current?.value;
-        const fileUrls = await Promise.all(step.files.flat().map(file => uploadStepImage(file, id)));
+        const fileUrls = await Promise.all(step.files.flat().map(file => uploadStepImage(file, id,step.id)));
         return {
           name: step.name,
           desc,
