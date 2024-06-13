@@ -3,8 +3,12 @@ import JoditEditor from 'jodit-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { getLabCollection, updateLabCollection } from '../services/labServices';
+import ClimbingBoxLoader from "react-spinners/ClimbingBoxLoader";
 
 const UpdateLab = () => {
+  const [loader, setLoader] = useState(false);
+
+  
   const { labId } = useParams();
   const [lab, setLab] = useState({
     title: "",
@@ -112,9 +116,11 @@ const UpdateLab = () => {
       throw error;
     }
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoader(true);
     const form = e.target;
     const thumbFile = form.thumbnail.files[0];
     const thumbdesc = editor1.current.value;
@@ -201,11 +207,27 @@ const UpdateLab = () => {
       };
 
       await updateLabCollection(labId, updatedLab);
+      setLoader(false);
       navigate('/labdetails/' + labId); // Redirect to lab details page after successful update
     } catch (error) {
       console.error('Error updating lab:', error);
     }
   };
+  if (loader) {
+    return (
+      <>
+        <div className="text-center text-slate-700 text-3xl">
+          updating your lab
+        </div>
+        <div className='w-full h-screen flex justify-center items-center'>
+          <ClimbingBoxLoader
+            color='grey'
+            size={70}
+          />
+        </div>
+      </>
+    )
+  }
 
 
   return (

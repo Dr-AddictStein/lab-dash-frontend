@@ -3,6 +3,7 @@ import JoditEditor from 'jodit-react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { addLabCollection } from '../services/labServices';
+import ClimbingBoxLoader from "react-spinners/ClimbingBoxLoader";
 
 const CreateNewLab = () => {
   const [step, setStep] = useState([]);
@@ -10,6 +11,23 @@ const CreateNewLab = () => {
   const editor2 = useRef(null);
   const stepEditors = useRef([]);
   const navigate = useNavigate();
+  const [loader, setLoader] = useState(false);
+
+  if (loader) {
+    return (
+      <>
+        <div className="text-center text-slate-700 text-3xl">
+          creating your lab
+        </div>
+        <div className='w-full h-screen flex justify-center items-center'>
+          <ClimbingBoxLoader
+            color='grey'
+            size={70}
+          />
+        </div>
+      </>
+    )
+  }
 
   const addStep = () => {
     setStep([...step, { id: step.length, name: '', desc: '', expanded: false, files: [[], [], []] }]);
@@ -85,6 +103,7 @@ const CreateNewLab = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoader(true);
     const form = e.target;
     const thumbFile = form.thumbnail.files[0];
     const thumbdesc = editor1.current.value;
@@ -150,14 +169,14 @@ const CreateNewLab = () => {
         title,
         desc: thumbdesc,
         objective,
-        cloudprovider:cp,
-        type:tp,
-        difficulty:diff,
+        cloudprovider: cp,
+        type: tp,
+        difficulty: diff,
         srccode: srccodeUrl,
         thumbnail: thumbImageUrl,
         steps,
-        isPublished:true,
-        isDeleted:false
+        isPublished: true,
+        isDeleted: false
       };
 
       // Logging the newLab object to the console
@@ -166,6 +185,7 @@ const CreateNewLab = () => {
       // Make your API call here to save the newLab data
       try {
         await addLabCollection(newLab);
+        setLoader(false);
         navigate('/'); // Redirect to home or another page after successful submission
       } catch (error) {
         console.error('Error creating new lab:', error);
